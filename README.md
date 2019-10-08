@@ -9,5 +9,6 @@ This demo requires Python 3.
 ```
 $ virtualenv pyenv
 $ pyenv/bin/pip install -r requirements.txt
-$ pyenv/bin/python Main/main.py
+$ pyenv/bin/python -m Main.main
+$ mkdir Data
 ```
