@@ -16,9 +16,9 @@ for i, val in enumerate(train):
     input = []
     for current_words in batch:
         # for each word batch group
-        #each current words is a 1*batch vec
+        # each current words is a 1*batch vec
 
-        print("current words size:" , current_words.size())
+        print("current words size:", current_words.size())
 
         words = [vocab.itos[w.item()].lower() for w in current_words]
 
@@ -30,10 +30,9 @@ for i, val in enumerate(train):
             out = model(vectors)
         except:
             for vec in vectors:
-                print("crash:",(vec.size()))
+                print("crash:", (vec.size()))
             for current_words in words:
                 print("crash:", current_words)
-
 
         # print(vectors)
 

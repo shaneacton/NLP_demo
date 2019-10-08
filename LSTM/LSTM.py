@@ -1,6 +1,7 @@
 import torch.nn as nn
 import torch
 
+
 class LSTM(nn.Module):
     def __init__(self, input_dim, hidden_dim, n_layers, bidirectional, dropout):
         super().__init__()
@@ -20,6 +21,5 @@ class LSTM(nn.Module):
         input = self.dropout(input)
         output, (hidden, cell) = self.rnn(input)
         hidden = self.dropout(torch.cat((hidden[-2, :, :], hidden[-1, :, :]), dim=1))
-
 
         return self.fc(hidden)

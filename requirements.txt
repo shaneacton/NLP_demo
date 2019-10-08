@@ -3,3 +3,7 @@ spacy==2.2.1
 torch==1.0.1
 torchtext==0.4.0
 tensorflow-hub==0.6.0
+
+pytorch-nlp
+pytorch_pretrained_bert
+keras

@@ -3,8 +3,10 @@ from torchtext import data
 from torchtext import datasets
 import json
 
+from torchnlp import imdb_dataset
 
 path = "../Data/IMDB/"
+
 
 def save_tokenised_imdb():
     """
@@ -16,7 +18,7 @@ def save_tokenised_imdb():
     LABEL = data.LabelField(dtype=torch.float)
     train_data, test_data = datasets.IMDB.splits(TEXT, LABEL)
     import random
-    train_data, valid_data = train_data.split(random_state = random.seed(0))
+    train_data, valid_data = train_data.split(random_state=random.seed(0))
 
     train_examples = [vars(t) for t in train_data]
     test_examples = [vars(t) for t in test_data]
@@ -42,8 +44,8 @@ def load_tokenised_imdb():
 
     train_data, test_data = data.TabularDataset.splits(
         path='.',
-        train= path + 'train.json',
-        test= path + 'test.json',
+        train=path + 'train.json',
+        test=path + 'test.json',
         format='json',
         fields=fields
     )
@@ -59,21 +61,22 @@ def load_tokenised_imdb():
 
     return train_iter, test_iter, TEXT
 
+
 def get_imdb_vocab():
     """
     :return: a set of all the words found in the imdb dataset
     """
-    #used to narrow down 840 B glove words
+    # used to narrow down 840 B glove words
     words = set()
     with open(path + 'imdb.vocab', 'r+', encoding="utf8") as f:
         for line in f:
-            word = line.replace("\n","")
+            word = line.replace("\n", "")
             # print(word)
             words.add(word)
 
     return words
 
+
 if __name__ == "__main__":
     save_tokenised_imdb()
-    #get_imdb_vocab()
-
+    # get_imdb_vocab()
