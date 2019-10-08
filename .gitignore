@@ -1,0 +1,13 @@
+**/Data/*
+**/.data/*
+
+**/.idea
+
+**/pyenv/*
+
+__pycache__/
+*.py[cod]
+*$py.class
+
+*.so
+Runs_fetcher.bat
