@@ -2,8 +2,9 @@ from DataProcessor import IMDB
 import numpy as np
 import torch
 import spacy
+import os
 
-path = "../Data/GloVe/"
+path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'Data', 'GloVe') + '/'
 nlp = spacy.load("en_core_web_sm")
 vectors = {}
 
