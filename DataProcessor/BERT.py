@@ -10,12 +10,10 @@ from pytorch_pretrained_bert import BertTokenizer
 from keras.preprocessing.sequence import pad_sequences
 from torch.utils.data import TensorDataset, DataLoader, RandomSampler, SequentialSampler
 
-
 # Bert Model
 class BertEmbedder(nn.Module):
     def __init__(self):
         super(BertEmbedder, self).__init__()
-
         self.bert = BertModel.from_pretrained('bert-base-uncased')
 
     def forward(self, tokens, masks=None):

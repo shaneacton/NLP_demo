@@ -9,30 +9,39 @@ nlp = spacy.load("en_core_web_sm")
 vectors = {}
 
 
-def get_glove_embeddings(text):
-    text = text.lower()
-    doc = nlp(text)
-    tokens = []
-    for token in doc:
-        # print(token.text, token.pos_, token.dep_)
-        tokens.append(token.text)
-
+def get_glove_embeddings(word):
+    # text = text.lower()
+    # doc = nlp(text)
+    # tokens = []
+    # for token in doc:
+    #     # print(token.text, token.pos_, token.dep_)
+    #     tokens.append(token.text)
+    #
     word2vec = get_glove_word2vec()
+    #
+    embeddings = np.array([])
+    # # print("word2vec:", word2vec.keys())
+    #
+    # for word in tokens:
+    if word in word2vec.keys():
+        # print("word '",word,"' in word2vec", sep = '')
+        app = word2vec[word]
+        # print("in:" , append.shape)
 
-    embeddings = []
-    # print("word2vec:", word2vec.keys())
+    else:
+        # print("word '",word,"' not in word2vec", sep = '')
+        app = np.random.rand(300)
+        # print("out:", append.shape)
+    # print(append.shape())
 
-    for word in tokens:
-        if word in word2vec.keys():
-            # print("word '",word,"' in word2vec", sep = '')
-            embeddings.append(word2vec[word])
-        else:
-            # print("word '",word,"' not in word2vec", sep = '')
-            embeddings.append(np.random.rand(300))
+    embeddings = np.append(embeddings, app)
+        # print("emb shape:" , embeddings.shape)
 
-    # print(embeddings)
+    embeddings = np.array(embeddings)
+    # print(embeddings.shape)
 
-    return torch.from_numpy(np.array(embeddings)).float()
+
+    return torch.from_numpy(embeddings).float().reshape(1,-1)
 
 def get_glove_word2vec():
 
@@ -53,6 +62,7 @@ def get_glove_word2vec():
                 continue
 
             vectors[word] = vect
+
 
     return vectors
 

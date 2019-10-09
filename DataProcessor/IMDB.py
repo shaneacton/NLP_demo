@@ -2,11 +2,12 @@ import torch
 from torchtext import data
 from torchtext import datasets
 import json
+import torchnlp
 
-from torchnlp import imdb_dataset
+from torchnlp.datasets import imdb_dataset
 
 path = "../Data/IMDB/"
-
+numBatchesTrain = 128
 
 def save_tokenised_imdb():
     """
@@ -51,7 +52,7 @@ def load_tokenised_imdb():
     )
 
     train_iter, test_iter = data.Iterator.splits(
-        (train_data, test_data), batch_sizes=(16, 256),
+        (train_data, test_data), batch_sizes=(numBatchesTrain, 256),
         sort_key=lambda x: len(x.text), device=0)
 
     TEXT.build_vocab(train_data)
