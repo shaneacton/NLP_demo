@@ -19,8 +19,8 @@ class BertEmbedder(nn.Module):
         self.bert = BertModel.from_pretrained('bert-base-uncased')
 
     def forward(self, tokens, masks=None):
-        _, pooled_output = self.bert(tokens, attention_mask=masks, output_all_encoded_layers=False)
-        return pooled_output
+        embedding, pooled_output = self.bert(tokens, attention_mask=masks, output_all_encoded_layers=False)
+        return embedding
 
 
 def prepare_data_bert(batch_size):
@@ -44,10 +44,10 @@ def prepare_data_bert(batch_size):
     test_tokens = list(map(lambda t: ['[CLS]'] + tokenizer.tokenize(t)[:510] + ['[SEP]'], test_texts))
 
     train_tokens_ids = pad_sequences(list(map(tokenizer.convert_tokens_to_ids, train_tokens)), maxlen=512,
-                                     truncating="post", padding="post", dtype="int")
+                                     truncating='post', padding='post', dtype='int')
     test_tokens_ids = pad_sequences(list(map(tokenizer.convert_tokens_to_ids, test_tokens)), maxlen=512,
-                                    truncating="post",
-                                    padding="post", dtype="int")
+                                    truncating='post',
+                                    padding='post', dtype='int')
 
     train_y = np.array(np.array(train_labels) == 'pos', dtype=np.uint8)
     test_y = np.array(np.array(test_labels) == 'pos', dtype=np.uint8)
@@ -90,4 +90,5 @@ if __name__ == '__main__':
 
     token_ids, masks, labels = (t.to(device) for t in next(iter(train_dataloader)))
     out = bert_embedder(token_ids, masks)
-    print(out.shape)
+    print('token', token_ids.shape)
+    print('out', out.shape)
