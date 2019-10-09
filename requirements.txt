@@ -7,3 +7,5 @@ tensorflow-hub==0.6.0
 pytorch-nlp
 pytorch_pretrained_bert
 keras
+
+jupyter

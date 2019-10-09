@@ -4,6 +4,7 @@
 **/.idea
 
 **/pyenv/*
+**/venv/*
 
 __pycache__/
 *.py[cod]

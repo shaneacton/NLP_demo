@@ -1,6 +1,5 @@
-# https://github.com/shudima/notebooks/blob/master/BERT_to_the_rescue.ipynb
+# https://towardsdatascience.com/bert-to-the-rescue-17671379687f
 
-import sys
 import numpy as np
 import random as rn
 import torch
@@ -10,51 +9,85 @@ from torchnlp.datasets import imdb_dataset
 from pytorch_pretrained_bert import BertTokenizer
 from keras.preprocessing.sequence import pad_sequences
 from torch.utils.data import TensorDataset, DataLoader, RandomSampler, SequentialSampler
-from torch.optim import Adam
-from torch.nn.utils import clip_grad_norm_
 
 
-rn.seed(321)
-np.random.seed(321)
-torch.manual_seed(321)
-torch.cuda.manual_seed(321)
+# Bert Model
+class BertEmbedder(nn.Module):
+    def __init__(self):
+        super(BertEmbedder, self).__init__()
 
-train_data, test_data = imdb_dataset(directory="../Data/IMDB-pytorch", train=True, test=True    )
-rn.shuffle(train_data)
-rn.shuffle(test_data)
-train_data = train_data[:1000]
-test_data = test_data[:100]
+        self.bert = BertModel.from_pretrained('bert-base-uncased')
 
-train_texts, train_labels = list(zip(*map(lambda d: (d['text'], d['sentiment']), train_data)))
-test_texts, test_labels = list(zip(*map(lambda d: (d['text'], d['sentiment']), test_data)))
+    def forward(self, tokens, masks=None):
+        _, pooled_output = self.bert(tokens, attention_mask=masks, output_all_encoded_layers=False)
+        return pooled_output
 
-print(len(train_texts), len(train_labels), len(test_texts), len(test_labels))
 
-tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
+def prepare_data_bert(batch_size):
+    """:returns train and test loader for the IMDB dataset formatted correctly for BERT, each item in the dataset is in
+    the form (token_ids, masks, labels)"""
+    print('Loading IMDB data...')
 
-train_tokens = list(map(lambda t: ['[CLS]'] + tokenizer.tokenize(t)[:510] + ['[SEP]'], train_texts))
-test_tokens = list(map(lambda t: ['[CLS]'] + tokenizer.tokenize(t)[:510] + ['[SEP]'], test_texts))
+    train_data, test_data = imdb_dataset(train=True, test=True)
+    rn.shuffle(train_data)
+    rn.shuffle(test_data)
+    train_data = train_data[:1000]
+    test_data = test_data[:100]
 
-print(len(train_tokens), len(test_tokens))
+    train_texts, train_labels = list(zip(*map(lambda d: (d['text'], d['sentiment']), train_data)))
+    test_texts, test_labels = list(zip(*map(lambda d: (d['text'], d['sentiment']), test_data)))
 
-train_tokens_ids = pad_sequences(list(map(tokenizer.convert_tokens_to_ids, train_tokens)), maxlen=512, truncating="post", padding="post", dtype="int")
-test_tokens_ids = pad_sequences(list(map(tokenizer.convert_tokens_to_ids, test_tokens)), maxlen=512, truncating="post", padding="post", dtype="int")
+    print('Tokenizing for BERT')
+    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
 
-print(train_tokens_ids.shape, test_tokens_ids.shape)
+    train_tokens = list(map(lambda t: ['[CLS]'] + tokenizer.tokenize(t)[:510] + ['[SEP]'], train_texts))
+    test_tokens = list(map(lambda t: ['[CLS]'] + tokenizer.tokenize(t)[:510] + ['[SEP]'], test_texts))
 
-train_tokens_ids = pad_sequences(list(map(tokenizer.convert_tokens_to_ids, train_tokens)), maxlen=512, truncating="post", padding="post", dtype="int")
-test_tokens_ids = pad_sequences(list(map(tokenizer.convert_tokens_to_ids, test_tokens)), maxlen=512, truncating="post", padding="post", dtype="int")
+    train_tokens_ids = pad_sequences(list(map(tokenizer.convert_tokens_to_ids, train_tokens)), maxlen=512,
+                                     truncating="post", padding="post", dtype="int")
+    test_tokens_ids = pad_sequences(list(map(tokenizer.convert_tokens_to_ids, test_tokens)), maxlen=512,
+                                    truncating="post",
+                                    padding="post", dtype="int")
 
-print(train_tokens_ids.shape, test_tokens_ids.shape)
+    train_y = np.array(np.array(train_labels) == 'pos', dtype=np.uint8)
+    test_y = np.array(np.array(test_labels) == 'pos', dtype=np.uint8)
+    train_y.shape, test_y.shape, np.mean(train_y), np.mean(test_y)
 
-train_y = np.array(train_labels) == 'pos'
-test_y = np.array(test_labels) == 'pos'
-print(train_y.shape, test_y.shape, np.mean(train_y), np.mean(test_y))
+    train_masks = [[float(i > 0) for i in ii] for ii in train_tokens_ids]
+    test_masks = [[float(i > 0) for i in ii] for ii in test_tokens_ids]
 
-train_masks = [[float(i > 0) for i in ii] for ii in train_tokens_ids]
-test_masks = [[float(i > 0) for i in ii] for ii in test_tokens_ids]
+    train_tokens_tensor = torch.tensor(train_tokens_ids)
+    train_y_tensor = torch.tensor(train_y.reshape(-1, 1)).float()
 
-train_masks = [[float(i > 0) for i in ii] for ii in train_tokens_ids]
-test_masks = [[float(i > 0) for i in ii] for ii in test_tokens_ids]
+    test_tokens_tensor = torch.tensor(test_tokens_ids)
+    test_y_tensor = torch.tensor(test_y.reshape(-1, 1)).float()
 
-# Baseline
+    train_masks_tensor = torch.tensor(train_masks)
+    test_masks_tensor = torch.tensor(test_masks)
+
+    train_dataset = TensorDataset(train_tokens_tensor, train_masks_tensor, train_y_tensor)
+    train_sampler = RandomSampler(train_dataset)
+    train_dataloader = DataLoader(train_dataset, sampler=train_sampler, batch_size=batch_size)
+
+    test_dataset = TensorDataset(test_tokens_tensor, test_masks_tensor, test_y_tensor)
+    test_sampler = SequentialSampler(test_dataset)
+    test_dataloader = DataLoader(test_dataset, sampler=test_sampler, batch_size=batch_size)
+
+    return train_dataloader, test_dataloader
+
+
+if __name__ == '__main__':
+    rn.seed(321)
+    np.random.seed(321)
+    torch.manual_seed(321)
+    torch.cuda.manual_seed(321)
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    torch.cuda.empty_cache()
+
+    bert_embedder = BertEmbedder().cuda()
+
+    train_dataloader, test_dataloader = prepare_data_bert(4)
+
+    token_ids, masks, labels = (t.to(device) for t in next(iter(train_dataloader)))
+    out = bert_embedder(token_ids, masks)
+    print(out.shape)
