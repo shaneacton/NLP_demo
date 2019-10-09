@@ -47,7 +47,7 @@ LABEL.build_vocab(train_data)
 
 
 
-BATCH_SIZE = 64
+BATCH_SIZE = 4
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
@@ -88,7 +88,7 @@ print(f'The model has {count_parameters(model):,} trainable parameters')
 
 pretrained_embeddings = TEXT.vocab.vectors
 
-print(pretrained_embeddings.shape)
+print("embeddings shape: ", pretrained_embeddings.shape)
 
 
 
@@ -101,7 +101,7 @@ UNK_IDX = TEXT.vocab.stoi[TEXT.unk_token]
 model.embedding.weight.data[UNK_IDX] = torch.zeros(EMBEDDING_DIM)
 model.embedding.weight.data[PAD_IDX] = torch.zeros(EMBEDDING_DIM)
 
-print(model.embedding.weight.data)
+print("embeddings weight shape:", model.embedding.weight.data.shape)
 
 
 
@@ -131,13 +131,15 @@ def binary_accuracy(preds, y):
     return acc
 
 
-def train(model, iterator, optimizer, criterion):
+def train(model, iterator, optimizer, criterion, max_batches = -1):
     epoch_loss = 0
     epoch_acc = 0
 
     model.train()
 
+    i=0
     for batch in iterator:
+        i+=1
         optimizer.zero_grad()
 
         text, text_lengths = batch.text
@@ -154,6 +156,9 @@ def train(model, iterator, optimizer, criterion):
 
         epoch_loss += loss.item()
         epoch_acc += acc.item()
+
+        if max_batches!= -1 and i>=max_batches:
+            break
 
     return epoch_loss / len(iterator), epoch_acc / len(iterator)
 
