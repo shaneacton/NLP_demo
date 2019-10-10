@@ -13,23 +13,23 @@ criterion = nn.BCEWithLogitsLoss()
 
 batch_size = 1
 
-train, test = BERT.prepare_data_bert(batch_size=batch_size)
+train_data, test_data = BERT.prepare_data_bert(batch_size=batch_size)
 print("loaded BERT imdb")
 
 
 def train(num_epochs, embedding_dims = 768, bidirectional = True, max_batches = -1):
 
-    model = LSTM(embedding_dims, 150, 1, 1, bidirectional, 0).cuda()
+    model = LSTM(embedding_dims, 150, 1, 1, bidirectional, 0)
+    model.cuda()
     optimizer = optim.Adam(model.parameters())
 
     bert_embedder = BertEmbedder().cuda()
-
 
     for e in range(num_epochs):
         epoch_loss = 0
         model.train()
 
-        for i, val in enumerate(train):
+        for i, val in enumerate(train_data):
             # for each batch
             optimizer.zero_grad()
             # print(val)
@@ -51,9 +51,9 @@ def train(num_epochs, embedding_dims = 768, bidirectional = True, max_batches = 
             if max_batches != -1 and i + 1 >= max_batches:
                 break
 
-        epoch_loss = epoch_loss/ (min(max_batches,len(train)))
+        epoch_loss = epoch_loss/ (min(max_batches, len(train_data)))
         print("epoch:" , e , "loss:",epoch_loss)
-        print("test acc:" , evaluate(model, test, ))
+        print("test acc:", evaluate(model, test_data, ))
 
 
 def binary_accuracy(preds, y):
@@ -92,5 +92,5 @@ def evaluate(model, test):
     return  epoch_acc / len(test)
 
 if __name__ == "__main__":
-    train()
+    train_data()
 
