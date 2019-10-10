@@ -59,11 +59,14 @@ def binary_accuracy(preds, y):
     """
 
     # round predictions to the closest integer
+    # print('preds', preds)
+    # print('y', y)
     rounded_preds = torch.round(preds)
-    # print("label:",y,"\npreds:",rounded_preds)
+    # print('rounded', rounded_preds)
     correct = (rounded_preds == y).float()  # convert into float for division
-    # print(correct)
+    # print('correct', correct)
     acc = correct.sum() / correct.numel()
+    # print('acc', acc)
     return acc
 
 

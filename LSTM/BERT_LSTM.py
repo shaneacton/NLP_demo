@@ -16,10 +16,12 @@ class LSTM(nn.Module):
         if bidirectional:
             self.fc = nn.Linear(hidden_dim * 2, output_dim)
         else:
-            self.fc = nn.Linear(hidden_dim , output_dim)
+            self.fc = nn.Linear(hidden_dim, output_dim)
 
         self.dropout = nn.Dropout(dropout)
         self.bidirectional = bidirectional
+
+        self.sig = nn.Sigmoid()
 
     def forward(self, input):
         # text = [sent len, batch size]
@@ -29,4 +31,4 @@ class LSTM(nn.Module):
         if self.bidirectional:
             hidden = self.dropout(torch.cat((hidden[-2, :, :], hidden[-1, :, :]), dim=1))
 
-        return self.fc(hidden)
+        return self.sig(self.fc(hidden))
