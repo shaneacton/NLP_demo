@@ -1,6 +1,7 @@
 import torch.nn as nn
 import torch
 
+
 class RNN(nn.Module):
     def __init__(self, vocab_size, embedding_dim, hidden_dim, output_dim, n_layers,
                  bidirectional, dropout, pad_idx):
@@ -18,9 +19,10 @@ class RNN(nn.Module):
         if bidirectional:
             self.fc = nn.Linear(hidden_dim * 2, output_dim)
         else:
-            self.fc = nn.Linear(hidden_dim , output_dim)
+            self.fc = nn.Linear(hidden_dim, output_dim)
 
         self.dropout = nn.Dropout(dropout)
+        self.sig = nn.Sigmoid()
 
     def forward(self, text, text_lengths):
 
@@ -34,9 +36,7 @@ class RNN(nn.Module):
         # unpack sequence
         output, output_lengths = nn.utils.rnn.pad_packed_sequence(packed_output)
 
-
         if self.bidirectional:
             hidden = self.dropout(torch.cat((hidden[-2, :, :], hidden[-1, :, :]), dim=1))
 
-
-        return self.fc(hidden)
+        return self.sig(self.fc(hidden))
