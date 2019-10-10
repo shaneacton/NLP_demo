@@ -1,6 +1,20 @@
-from DataProcessor import ELMo, GloVe
-import time
+from Main import train_BERT, train_GloVe
 
-from Main import train
+max_batches = -1
+num_epochs = 15
 
-train.train_model()
+print("BERT:")
+
+print("bidirectional:")
+train_BERT.train(num_epochs,max_batches = max_batches, bidirectional= True)
+
+print("unidirectional:")
+train_BERT.train(num_epochs,max_batches = max_batches, bidirectional= False)
+
+print("Glove:")
+
+print("bidirectional:")
+train_GloVe.train(num_epochs,max_batches = max_batches, bidirectional= True)
+
+print("unidirectional:")
+train_GloVe.train(num_epochs,max_batches = max_batches, bidirectional= False)

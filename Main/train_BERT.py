@@ -1,7 +1,7 @@
 
 from DataProcessor import BERT
 from DataProcessor.BERT import BertEmbedder
-from LSTM.LSTM import LSTM
+from LSTM.BERT_LSTM import LSTM
 
 import torch
 import torch.optim as optim
@@ -11,22 +11,21 @@ import torch.nn as nn
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 criterion = nn.BCEWithLogitsLoss()
 
-max_batches = 15000
 batch_size = 1
 
+train, test = BERT.prepare_data_bert(batch_size=batch_size)
+print("loaded BERT imdb")
 
-def train_model(embedding_dims = 768):
-    model = LSTM(embedding_dims, 150, 1, 1, False, 0).cuda()
+
+def train(num_epochs, embedding_dims = 768, bidirectional = True, max_batches = -1):
+
+    model = LSTM(embedding_dims, 150, 1, 1, bidirectional, 0).cuda()
     optimizer = optim.Adam(model.parameters())
 
     bert_embedder = BertEmbedder().cuda()
 
-    train, test = BERT.prepare_data_bert(batch_size=batch_size)
 
-    print("loaded imdb")
-
-
-    for e in range(15):
+    for e in range(num_epochs):
         epoch_loss = 0
         model.train()
 
@@ -49,7 +48,7 @@ def train_model(embedding_dims = 768):
 
             epoch_loss += loss.item()
 
-            if i + 1 >= max_batches:
+            if max_batches != -1 and i + 1 >= max_batches:
                 break
 
         epoch_loss = epoch_loss/ (min(max_batches,len(train)))
@@ -91,4 +90,7 @@ def evaluate(model, test):
             epoch_acc += acc.item()
 
     return  epoch_acc / len(test)
+
+if __name__ == "__main__":
+    train()
 

@@ -25,7 +25,8 @@ class LSTM(nn.Module):
         # text = [sent len, batch size]
         input = self.dropout(input)
         output, (hidden, cell) = self.rnn(input)
+
         if self.bidirectional:
             hidden = self.dropout(torch.cat((hidden[-2, :, :], hidden[-1, :, :]), dim=1))
 
-        return torch.sigmoid(self.fc(output[-1])), hidden
+        return self.fc(hidden)
