@@ -48,7 +48,7 @@ def train(num_epochs, embedding_dims=768, bidirectional=True, max_batches=-1):
             if max_batches != -1 and i + 1 >= max_batches:
                 break
 
-        epoch_loss = epoch_loss / (min(max_batches, len(train_data)))
+        epoch_loss /= (min(max_batches, len(train_data))) if max_batches != -1 else len(train_data)
         print("epoch:", e, "loss:", epoch_loss)
         print("test acc:", evaluate(model, test_data))
 
