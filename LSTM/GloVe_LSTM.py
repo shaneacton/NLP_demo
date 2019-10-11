@@ -39,4 +39,4 @@ class RNN(nn.Module):
         if self.bidirectional:
             hidden = self.dropout(torch.cat((hidden[-2, :, :], hidden[-1, :, :]), dim=1))
 
-        return self.sig(self.fc(hidden))
+        return self.fc(hidden)
