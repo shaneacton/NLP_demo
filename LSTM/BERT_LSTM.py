@@ -14,6 +14,7 @@ class LSTM(nn.Module):
                            dropout=dropout)
 
         if bidirectional:
+            #twice as many out features in bidir due to cat of hidden states
             self.fc = nn.Linear(hidden_dim * 2, output_dim)
         else:
             self.fc = nn.Linear(hidden_dim, output_dim)
@@ -29,6 +30,7 @@ class LSTM(nn.Module):
         output, (hidden, cell) = self.rnn(input)
 
         if self.bidirectional:
+            # must concat the hidden states from each directions LSTM together in case of bidir
             hidden = self.dropout(torch.cat((hidden[-2, :, :], hidden[-1, :, :]), dim=1))
 
         return self.sig(self.fc(hidden))

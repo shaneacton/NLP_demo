@@ -1,6 +1,8 @@
 from Main import train_BERT
 from Main import train_GloVe
 
+# runs BERT and GLOVE eval for both uni and bi directional LSTMS
+
 max_batches = -1
 num_epochs = 15
 

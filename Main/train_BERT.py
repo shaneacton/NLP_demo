@@ -6,6 +6,9 @@ import torch
 import torch.optim as optim
 import torch.nn as nn
 
+#main file in charge of training and evaluating the BERT LSTM
+#also in charge of loading data
+
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 criterion = nn.BCEWithLogitsLoss()
 
