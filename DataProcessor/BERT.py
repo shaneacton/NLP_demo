@@ -10,6 +10,7 @@ from pytorch_pretrained_bert import BertTokenizer
 from keras.preprocessing.sequence import pad_sequences
 from torch.utils.data import TensorDataset, DataLoader, RandomSampler, SequentialSampler
 
+
 # Bert Model
 class BertEmbedder(nn.Module):
     def __init__(self):
@@ -40,9 +41,10 @@ def prepare_data_bert(batch_size):
 
     train_tokens = list(map(lambda t: ['[CLS]'] + tokenizer.tokenize(t)[:510] + ['[SEP]'], train_texts))
     test_tokens = list(map(lambda t: ['[CLS]'] + tokenizer.tokenize(t)[:510] + ['[SEP]'], test_texts))
-
+    print(list(map(tokenizer.convert_tokens_to_ids, train_tokens))[0])
     train_tokens_ids = pad_sequences(list(map(tokenizer.convert_tokens_to_ids, train_tokens)), maxlen=512,
                                      truncating='post', padding='post', dtype='int')
+    # print(train_tokens_ids[0])
     test_tokens_ids = pad_sequences(list(map(tokenizer.convert_tokens_to_ids, test_tokens)), maxlen=512,
                                     truncating='post',
                                     padding='post', dtype='int')
@@ -74,19 +76,12 @@ def prepare_data_bert(batch_size):
     return train_dataloader, test_dataloader
 
 
+def prep_sentence_bert(s, tokenizer):
+    tokens = list(['[CLS]'] + tokenizer.tokenize(s)[:510] + ['[SEP]'])
+    token_ids = tokenizer.convert_tokens_to_ids(tokens)
+    return torch.tensor(token_ids)
+
+
 if __name__ == '__main__':
-    rn.seed(321)
-    np.random.seed(321)
-    torch.manual_seed(321)
-    torch.cuda.manual_seed(321)
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    torch.cuda.empty_cache()
-
-    bert_embedder = BertEmbedder().cuda()
-
-    train_dataloader, test_dataloader = prepare_data_bert(4)
-
-    token_ids, masks, labels = (t.to(device) for t in next(iter(train_dataloader)))
-    out = bert_embedder(token_ids, masks)
-    print('token', token_ids.shape)
-    print('out', out.shape)
+    print(prep_sentence_bert('test sentence hello hello hi',
+                             BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)))

@@ -9,9 +9,8 @@ if __name__ == "__main__":
 
     print("model loaded")
     while True:
-
         inp = input("type a sentence:\n")
-        if len(inp) ==0:
+        if len(inp) == 0:
             break
 
         pred = get_prediction_for_sentence(model, inp)
